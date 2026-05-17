@@ -160,7 +160,8 @@ extension MainView {
                                 categorySection(
                                     title: categoryDatum.title,
                                     icon: categoryDatum.icon,
-                                    books: homeViewModel.getBooksForCategory(category: categoryDatum.title)
+                                    books: homeViewModel.getBooksForCategory(category: categoryDatum.title),
+									category: categoryDatum.title
                                 )
                             }
                             
@@ -176,9 +177,49 @@ extension MainView {
     private func categorySection(
         title: String,
         icon: String,
-        books: [Book]
+        books: [Book],
+		category: String
     ) -> some View {
-        
+		VStack(spacing: 15) { // 헤더와 도서 목록 사이 15 포인트 간격
+			// 카테고리 헤더
+			CategoryHeaderView(
+				title: title,
+				subTitle: "\(books.count)권",
+				icon: icon
+			)
+			// 도서 목록 뷰
+			ScrollView(.horizontal) {
+				LazyHStack(spacing: 15) {
+					ForEach(books) { book in
+						BookThumbnail.medium(book: book)
+							.onTapGesture {
+								selectedBook = book // 선택된 도서 설정 (상세보기 트리거)
+							}
+						// 무한 스크롤 구현 : 마지막 책이 나타나면 더 로드
+							.onAppear {
+								// 마지막에서 3번째 책이 나타나면 미리 로딩 시작
+								if let lastIndex = books.lastIndex(of: book),
+								   lastIndex >= books.count - 3,
+								   homeViewModel.hasMorePages(category: category),
+								   !homeViewModel.isLoadingMore(category: category) {
+									Task {
+										await homeViewModel.loadMoreBook(category: category)
+									}
+								}
+							}
+					}
+				}
+				.padding()
+			}
+			.scrollIndicators(.hidden)
+			.background(
+				Color.white
+					.clipShape(RoundedRectangle(cornerRadius: 10))
+					.shadow(radius: 5)
+			)
+			.padding(.horizontal, 15)
+			
+		} //:VSTACK
     }
 }
 
