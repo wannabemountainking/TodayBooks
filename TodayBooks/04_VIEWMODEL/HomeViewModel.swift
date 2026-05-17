@@ -104,4 +104,11 @@ final class HomeViewModel {
 		// 4. 로딩 상태 OFF
 		isLoadingCategories = false
 	}
+    
+    // MARK: - 데이터 접근 메서드들
+    
+    /// 특정 카테고리의 도서 목록 가져오기
+    func getBooksForCategory(category: String) -> [Book] {
+        return categoryBooks[category] ?? []    // 빈 배열을 기본값으로 제공하여 nil 체크 불필요
+    }
 }

@@ -142,8 +142,43 @@ extension MainView {
     @ViewBuilder
     private var mainContentScrollView: some View {
         ScrollView {
-            <#code#>
+            LazyVStack(
+                // 지연 로딩 VSTACK
+                spacing: 25,
+                pinnedViews: [.sectionHeaders],
+                content: {
+                    // 로딩 상태에 따른 조건부 렌더링
+                    if homeViewModel.isLoadingCategories {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                            .tint(.bookRed)
+                    } else {
+                        // 로딩이 끝나고 도서 별 섹션 표시
+                        VStack(spacing: 30) {
+                            // 카테고리 데이터 배열을 반복하여 각 카테고리 섹션 생성
+                            ForEach(categoryData, id: \.title) { categoryDatum in
+                                categorySection(
+                                    title: categoryDatum.title,
+                                    icon: categoryDatum.icon,
+                                    books: homeViewModel.getBooksForCategory(category: categoryDatum.title)
+                                )
+                            }
+                            
+                        } //:VSTACK
+                    }
+                }
+            )
+            .padding(.top, 15)
         } //:SCROLL
+    }
+    
+    @ViewBuilder
+    private func categorySection(
+        title: String,
+        icon: String,
+        books: [Book]
+    ) -> some View {
+        
     }
 }
 
