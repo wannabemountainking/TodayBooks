@@ -207,11 +207,87 @@ extension BookDetailView {
 				// 링크
 				WebView(url: url)
 			} label: {
-				<#code#>
-			}
+                HStack(spacing: 12) {
+                    // 사파리 브라우져 아이콘
+                    Image(systemName: "safari.fill")
+                        .font(.title3)
+                        .foregroundStyle(.bookOrange)
+                    
+                    // 링크 버튼 텍스트
+                    Text("상세 페이지 보기")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.bookOrange)
+                        .hLeading()
+                    
+                    // 오른쪽 화살표 아이콘
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.bookOrange)
+                        .hTrailing()
+                    
+                } //:HSTACK
+                .padding(15)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.bookOrange, lineWidth: 1.5)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.bookOrange.opacity(0.1))
+                        )
+                )
+			} //:NavLink
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 40)
 
 		}
+        
+        // MARK: - Share Button
+        ShareLink(
+            item: shareText,                        // 공유할 텍스트 내용
+            subject: Text(book.title),              // 이메일, 제목 등에 사용될 주제
+            message: Text("\(book.title)책 공유")     // 공유 시 추가 메시지
+        ) {
+            // Label 부분
+            HStack(spacing: 12) {
+                // 공유 아이콘
+                Image(systemName: "square.and.arrow.up")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                
+                // 공유 버튼 텍스트
+                Text("이 책 공유하기")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.white)
+            }
+            .hCenter()
+            .padding(.vertical, 15)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.bookRed)
+                    .shadow(color: Color.bookYellow.opacity(0.1), radius: 3)
+            )
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 20)
 	}
+    
+    /// 공유 텍스트 생성: 도서 정보를 포멧된 텍스트로 변환
+    private var shareText: String {
+        """
+        \(book.title)
+        
+        저자: \(book.authorsText)
+        출판사: \(book.publisher)
+        가격: \(book.price.formatted()) 원
+        
+        \(book.contents)
+        
+        자세히 보기: \(book.url)
+        """
+    }
 	
 }
 

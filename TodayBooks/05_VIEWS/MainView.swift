@@ -49,6 +49,12 @@ struct MainView: View {
                     
                 } //:VSTACK
             } //:ZSTACK
+            
+            // MARK: - Sheet 들 -> 다양한 화면을 시트 형태로 표시
+            // 도서 상세 보기 시트
+            .sheet(item: $selectedBook) { book in
+                BookDetailView(book: book) // 선택된 도서의 상세 정보 화면
+            }
         }//: NAVIGATIONSTACK
     }
 }
