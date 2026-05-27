@@ -39,7 +39,7 @@ final class MyBook {
 	// MARK: - 편의 생성자 (Convenience Init)
 	/// Book 객체 (API 에서 받은 데이터를) Mybook 객체 (로컬 저장용)으로 쉽게 변환
 	/// 사용자가 북마크 버튼을 눌렀을 때 Book -> MyBook 변환이 간단해짐
-	convenience init(book: Book) {
+	convenience init(from book: Book) {
 		self.init(
 			title: book.title,
 			contents: book.contents,

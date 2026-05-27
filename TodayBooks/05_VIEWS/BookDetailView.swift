@@ -17,6 +17,13 @@ struct BookDetailView: View {
 	
 	// 환경 변수들
 	@Environment(\.dismiss) private var dismiss // 화면 닫기 액션
+    @Environment(\.modelContext) private var modelContext // SwiftData 컨텍스트
+    
+    // 상태 관리
+    @State private var myLibraryViewModel: MyLibraryViewModel = .init()  // 나의 서재 관리 ViewModel
+    @State private var showBookmarkAlert: Bool = false // 북마크 알림 표시 상태
+    @State private var bookmarkMessage: String = "" // 북마크 관련 메시지
+    @State private var forceUpdateTrigger: Bool = false // 강제 UI 업데이트 트리거
 	
 	// TODO: 상태 관리 값들
 	
@@ -64,7 +71,10 @@ struct BookDetailView: View {
 							.foregroundStyle(Color.bookOrange)
 					}
 				}
-			}
+			} //:TOOLBAR
+            .onAppear {  // 뷰가 나타날 때 실행: SwiftData 컨텍스트 설정
+                
+            }
 		} //:NAVSTACK
     }
 }

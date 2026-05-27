@@ -53,7 +53,7 @@ final class MyLibraryViewModel {
 	/// 3. FetchDescriptor로 DB 쿼리 실행
 	/// 4. 결과를 myBooks에 저장
 	/// 5. 성공 / 실패 여부에 따라 상태 업데이트
-	private func loadBooks() {
+	func loadBooks() {
 		// 1. 컨텍스트 확인 - 없으면 DB 작업 불가능
 		guard let context = modelContext else { return }
 		// 2. 로딩 상태 시작
@@ -83,5 +83,81 @@ final class MyLibraryViewModel {
 	/// 4. DB에 삽입 (context.insert)
 	/// 5. 변경 사항 저장 (context.save)
 	/// 6. 목록 새로고침 (UI업데이트)
-	
+    func addBook(book: Book) {
+        // 1. 컨텍스트 확인
+        guard let context = modelContext else {return}
+        
+        // 2. 중복 체크 - 이미 북마크 된 책인지 확인
+        if isBookmarked(book: book) {
+            // True: 이미 북마크 되어 있음
+            errorMessage = "이미 라이브러리에 추가된 책입니다"
+            return
+        }
+        
+        do {
+            // 3. Book -> MyBook 변환
+            let myBook = MyBook(from: book)
+            
+            // 4. DB에 새 데이터 삽입
+            context.insert(myBook)
+            
+            // 5. 변경 사항을 디스크에 영구 저장
+            try context.save()
+            
+            // 6. 목록 새로 고침
+            loadBooks()
+        } catch {
+            // 저장 실패
+            errorMessage = "책 추가에 실패했습니다: \(error.localizedDescription)"
+        }
+    }
+    
+    /// DELETE: 라이브러리에서 도서 삭제
+    ///
+    /// 실행 흐름
+    /// 1. 컨텍스트 확인
+    /// 2. FetchDescriptor + Predicate 으로 삭제할 도서 찾기
+    /// 3. DB에서 삭제 (context.delete)
+    /// 4. 변경 사항 저장 (context.save)
+    /// 5. 목록 새로 고침
+    func removeBook(book: Book) {
+        // 1. 컨텍스트 확인
+        guard let context = modelContext else {return}
+        
+        // 2. FetchDescriptor + Predicate 으로 삭제할 도서 찾기
+        do {
+            // 삭제할 도서 찾기 - ISBN 기준
+            // #Predicate: myBooks 중에서 isbn이 일치하는 것을 찾아라
+            let descriptor = FetchDescriptor<MyBook>(predicate: #Predicate { myBook in
+                myBook.isbn == book.isbn
+            })
+            
+            // 찾아온 결과물을 가져오기, isbn은 유일하기 때문에 0개 또는 1개
+            if let myBook = try context.fetch(descriptor).first {
+                // 3. DB에서 삭제
+                context.delete(myBook)
+                // 4. 변경사항 저장
+                try context.save()
+                // 5. 목록 새로 고침
+                loadBooks()
+            } else {
+                print("MyLibraryViewModel 삭제할 책을 찾을 수 없음")
+            }
+        } catch  {
+            // 삭제 실패 - 에러처리
+            errorMessage = "책 삭제를 실패했습니다: \(error.localizedDescription)"
+        }
+        
+    }
+    
+    
+    // MARK: - Helper Methods
+    
+    /// 도서가 북마크 되어 있는지 안되어 있는지 확인하는 메서드 -> myBooks에 이 도서가 있는지 없는지 확인하는 메서드
+    /// 북마크가 되어 있으면 true, 아니면 false
+    func isBookmarked(book: Book) -> Bool {
+        return myBooks.contains { myBook in
+            myBook.isbn == book.isbn
+        }
+    }
 }
