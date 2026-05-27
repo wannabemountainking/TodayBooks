@@ -53,10 +53,11 @@ struct BookDetailView: View {
 					Button {
 						//action
 						// TODO: 북마크 상태 토글 함수 (MyList )
+						toggleBookmark() // 북마크 상태 토글 함수 호출
 					} label: {
-						Image(systemName: "bookmark.fill")
+						Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
 							.font(.title2)
-							.foregroundStyle(Color.bookRed)
+							.foregroundStyle(isBookmarked ? Color.bookRed : .bookOrange)
 					}
 				}
 				
@@ -73,7 +74,7 @@ struct BookDetailView: View {
 				}
 			} //:TOOLBAR
             .onAppear {  // 뷰가 나타날 때 실행: SwiftData 컨텍스트 설정
-                
+				myLibraryViewModel.setModelContext(context: modelContext) // ViewModel에 DB 컨텍스트(MyBooks의 ??) 전달
             }
 		} //:NAVSTACK
     }
@@ -299,6 +300,44 @@ extension BookDetailView {
         """
     }
 	
+	/// 북마크 상태 확인: 지금 도서가 나의 서재에 저장되어 있는지 확인(북마크가 되어 있는지)
+	private var isBookmarked: Bool {
+		// forceUpdateTrigger 를 참조하여 UI 강제 업데이트
+		_ = forceUpdateTrigger
+		return myLibraryViewModel.isBookmarked(book: book)
+	}
+	
+	// MARK: - 북마크 로직
+	/// 도서를 나의 서재에 추가 / 제거 하는 비즈니스 로직을 처리
+	/// SwiftData를 통해 삭제 그리고 추가 로직을 담당
+	private func toggleBookmark() {
+		// 토글 전 현재 북마크 상태 확인 / 저장
+		let wasBookmarked = isBookmarked
+		
+		// MyLibraryViewModel을 통한 북마크 상태 토글
+		myLibraryViewModel.toggleBookmark(book: book)
+		
+		// 에러처리: ViewModel에서 발생한 오류 확인
+		if let errorMessage = myLibraryViewModel.errorMessage {
+			bookmarkMessage = errorMessage // 에러메시지 표시
+		} else {
+			// 성공시: 토글 전 상태에 따라서 적절한 성공 메시지
+			bookmarkMessage = wasBookmarked
+			? "\(book.title) 이(가) 내 서재에서 제거되었습니다" // 북마크 해제 메시지
+			: "\(book.title) 이(가) 내 서재에 추가되었습니다"  // 북마크 추가 메시지
+		}
+		
+		// 사용자 피드백: 토스트 알림 표시
+		withAnimation(.spring) {
+			showBookmarkAlert = true
+		}
+		
+		// 상태 정리: ViewModel의 에러 상태 초기화 (다음 작업을 위해)
+		myLibraryViewModel.clearError()
+		
+		// 즉시 UI 업데이트를 위해 강제 새로고침 (색상 변경 반영)
+		forceUpdateTrigger.toggle()  
+	}
 }
 
 #Preview {

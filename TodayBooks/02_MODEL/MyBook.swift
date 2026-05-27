@@ -14,7 +14,7 @@ final class MyBook {
 	// MARK: - 저장 프로퍼티 들
 	var title: String // 도서 제목
 	var contents: String // 도서 소개/설명
-	let url: String // 도서 상세 페이지 URL
+	var url: String // 도서 상세 페이지 URL
 	var isbn: String // 도서 고유 번호(International Standard Book Number)
 	var authors: [String] // 저자 목록 (배열인 이유: 공저자가 여럿일 수 있음)
 	var publisher: String // 출판사

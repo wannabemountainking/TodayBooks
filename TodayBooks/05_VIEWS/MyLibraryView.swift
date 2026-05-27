@@ -105,10 +105,12 @@ extension MyLibraryView {
         ScrollView {
             LazyVStack(spacing: 20, pinnedViews: [.sectionHeaders]) {
                 VStack(spacing: 15) {
-                    BookThumbnail.grid(
-                        books: myBooks.map { $0.asBook }) { book in
-                            selectedBook = book
-                        }
+					BookThumbnail.grid(
+						books: myBooks.map { $0.asBook },
+						onBookTapped: { book in
+							selectedBook = book
+						}
+					)
                 } //:VSTACK
                 .hLeading()
                 .padding(.bottom, 40)

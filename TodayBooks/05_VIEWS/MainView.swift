@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 /// 앱에서 지원하는 카테고리들의 기본 정보를 정의
 struct CategoryDatum {
@@ -15,10 +16,16 @@ struct CategoryDatum {
 
 /// 엡의 핵심화면으로 모든 주요 기능에 접근할 수 있는 초기 화면
 struct MainView: View {
-    
+	
     // MARK: - Properties
+	@Environment(\.modelContext) private var modelContext // SwiftData 컨택스트
+	@Query private var myBooks: [MyBook] = []  // 저장된 도서 목록
+	
     /// 홈 화면 데이터 관리 ViewModel
     @State private var homeViewModel: HomeViewModel = .init()
+	/// 나의 서재 관리 ViewModel
+	@State private var myLibraryViewModel: MyLibraryViewModel = .init()
+	
     /// 선택된 도서 상세보기 용
     @State private var selectedBook: Book?
     /// 검색 화면 표시 상태 값
@@ -55,6 +62,18 @@ struct MainView: View {
             .sheet(item: $selectedBook) { book in
                 BookDetailView(book: book) // 선택된 도서의 상세 정보 화면
             }
+			// 도서 검색 화면 시트
+			.sheet(isPresented: $showSearchView) {
+				SearchView()
+			}
+			// 나의 서재 시트
+			.sheet(isPresented: $showMyLibrary) {
+				MyLibraryView()
+			}
+			// 뷰 나타날 때: 초기 설정 수행
+			.onAppear {
+				myLibraryViewModel.setModelContext(context: modelContext)
+			}
         }//: NAVIGATIONSTACK
     }
 }
@@ -139,6 +158,17 @@ extension MainView {
                     .frame(width:  45, height: 45)
                 
                 // TODO: 저장된 도서수 배지로 할 것
+				if myBooks.count > 0 {
+					Text("\(myBooks.count)") // 저장된 도서 개수
+						.font(.caption2)
+						.fontWeight(.bold)
+						.foregroundStyle(.white)
+						.frame(minWidth: 18, minHeight: 18)
+						.background(
+							Circle().fill(.bookRed)
+						)
+						.offset(x: 10, y: -10)
+				}
             } //:ZSTACK
             .buttonStyle(.plain)
         }

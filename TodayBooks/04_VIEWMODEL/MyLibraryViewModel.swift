@@ -160,4 +160,23 @@ final class MyLibraryViewModel {
             myBook.isbn == book.isbn
         }
     }
+	
+	/// 북마크 상태 토글 (추가 / 삭제 자동 전환)
+	func toggleBookmark(book: Book) {
+		if isBookmarked(book: book) {
+			removeBook(book: book) // 이미 북마크 되어 있으면 -> 삭제
+		} else {
+			addBook(book: book) // 북마크가 안 되어있으면 -> 추가
+		}
+	}
+	
+	/// 저장된 도서가 있는지 확인하는 property
+	var hasBooks: Bool {
+		return !myBooks.isEmpty
+	}
+	
+	/// 에러 메시지 초기화
+	func clearError() {
+		errorMessage = nil
+	}
 }
