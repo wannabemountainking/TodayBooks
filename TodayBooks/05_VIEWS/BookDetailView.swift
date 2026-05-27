@@ -76,6 +76,13 @@ struct BookDetailView: View {
             .onAppear {  // 뷰가 나타날 때 실행: SwiftData 컨텍스트 설정
 				myLibraryViewModel.setModelContext(context: modelContext) // ViewModel에 DB 컨텍스트(MyBooks의 ??) 전달
             }
+            // 북마크 메시지 나오는 곳
+            // 토스트 알림: 북마크 추가 / 제거 상태를 오버레이로 표시
+            .overlay(alignment: .top) {
+                if showBookmarkAlert {
+                    toastNotification // 토스트 알림 컴포넌트
+                }
+            }
 		} //:NAVSTACK
     }
 }
@@ -338,6 +345,48 @@ extension BookDetailView {
 		// 즉시 UI 업데이트를 위해 강제 새로고침 (색상 변경 반영)
 		forceUpdateTrigger.toggle()  
 	}
+    
+    /// 토스트 알림 컴포넌트: 북마크 상태 변경 시 상단에 표시되는 알림
+    @ViewBuilder
+    private var toastNotification: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
+                // 성공 아이콘
+                Image(systemName: bookmarkMessage.contains("추가") ? "bookmark.fill" : "bookmark.slash")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white)
+                
+                // 알림 메시지
+                Text(bookmarkMessage)
+                    .font(.headline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.leading)
+                
+                Spacer()
+            } //:HSTACK
+            .padding(15)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.bookRed)
+            )
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+            
+            Spacer()
+        } //:VSTACK
+        .transition(.move(edge: .top).combined(with: .opacity))
+        // 3초 후에 자동으로 토스트 알림 숨기기
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    showBookmarkAlert = false
+                }
+            }
+        }
+    }
+    
+    
 }
 
 #Preview {
