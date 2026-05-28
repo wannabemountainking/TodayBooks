@@ -55,6 +55,24 @@ struct MyLibraryView: View {
             .sheet(item: $selectedBook) { book in
                 BookDetailView(book: book)
             }
+			// alert 창
+			.alert("책 삭제", isPresented: $showingDeleteAlert) {
+				// 삭제버튼
+				Button("취소", role: .cancel) {
+					//Action
+					bookToDelete = nil
+				}
+				Button("삭제", role: .destructive) {
+					// Action
+					if let book = bookToDelete {
+						removeFromLibrary(book)
+						bookToDelete = nil
+					}
+				}
+			} message: {
+				Text("이 책을 내 서재에서 삭제하시겠습니까?")
+			}
+
         } //:NAVSTACK
     }
 }
@@ -109,6 +127,11 @@ extension MyLibraryView {
 						books: myBooks.map { $0.asBook },
 						onBookTapped: { book in
 							selectedBook = book
+						},
+						// 롱프레스 시 삭제하고 alert 표시
+						onBookLongPressed: { book in
+							bookToDelete = book
+							showingDeleteAlert = true
 						}
 					)
                 } //:VSTACK
@@ -117,6 +140,24 @@ extension MyLibraryView {
             } //:VSTACK
         } //:SCROLL
     }
+	
+	// Helper function
+	/// 나의 책 삭제 로직
+	private func removeFromLibrary(_ book: Book) {
+		// SwiftData에 저장된 MyBook 배열에서 대상이 있는지 찾기
+		if let myBookToDelete = myBooks.first(where: { myBook in
+			myBook.title == book.title && myBook.authorsText == book.authorsText
+		}) {
+			// modelContext에서 해당 데이터를 삭제 (메모리에서 제거)
+			modelContext.delete(myBookToDelete)
+			do {
+				// 변경 사항을 디스크에 저장
+				try modelContext.save()
+			} catch {
+				print("저장 실패: \(error.localizedDescription)")
+			}
+		}
+	}
 }
 
 /// 빈 상태 프리뷰

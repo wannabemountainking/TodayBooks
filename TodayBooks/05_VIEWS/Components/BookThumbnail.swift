@@ -87,7 +87,12 @@ extension BookThumbnail {
     
     /// 3열 그리드 레이아웃
     @ViewBuilder
-    static func grid(books: [Book], showTitle: Bool = true, onBookTapped: @escaping (Book) -> Void) -> some View {
+	static func grid(
+		books: [Book],
+		showTitle: Bool = true,
+		onBookTapped: @escaping (Book) -> Void,
+		onBookLongPressed: ((Book) -> Void)? = nil // 추가 롱프레스 콜백 - optional 이라서 기존 코드에서 수정 안해도 됨
+	) -> some View {
         LazyVGrid(
             columns: [
                 GridItem(.flexible(), spacing: 15),
@@ -101,6 +106,10 @@ extension BookThumbnail {
                         .onTapGesture {
                             onBookTapped(book)
                         }
+					// 롱프레스: 길게 0.5초 길게 누르면 onBookLongPressed 클로져 실행
+						.onLongPressGesture(minimumDuration: 0.5) {
+							onBookLongPressed?(book)
+						}
                 }
             }
         )
